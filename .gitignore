@@ -1,9 +1,2 @@
-/.idea/.gitignore
-/.idea/applied-linear-algebra.iml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/inspectionProfiles/Project_Default.xml
-/CT_scan/README.md
-/CT_scan/utils.py
-/.idea/vcs.xml
+.idea
+.vscode
