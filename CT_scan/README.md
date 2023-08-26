@@ -7,8 +7,8 @@ Write a Code in Either MATLAB, C/C++ or Python to solve a general inverse proble
 ## Mathematical statement
 
 the problem reduces to
-$$ A \lambda = d $$
-where, $ A $ is the matrix containing information about the intercept of x-rays on the material.
+$$A \lambda = d$$
+where, $A$ is the matrix containing information about the intercept of x-rays on the material.
 $\lambda$ is the flattened image of the material (attenuation constant data), which will be the final output.
 $d$ is made using the given intensity $I_o$ of the  radiation source and
 
