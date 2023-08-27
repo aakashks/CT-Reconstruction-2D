@@ -60,11 +60,14 @@ class CreateAMatrix:
         else:
             raise Exception
 
-    def get_all_pixel_interepts_from_line(self, a, n, d, theta):
+    def get_all_pixel_interepts_from_line(self, line_params):
         """
         get all pixel intercepts and make the intercept matrix
         line parameters are taken using one corner as origin
         """
+        a = self.z
+        n = self.a
+        d, theta = line_params
         k = a / n
         assert k.is_integer(), 'k not int'
         k = int(k)
@@ -84,7 +87,8 @@ class CreateAMatrix:
                 i += 1
                 d = (d + k / np.tan(theta))
 
-        return intercept_matrix
+        # change to 1d vector
+        return intercept_matrix.flatten()
 
     def generate_lines(self):
         phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
@@ -98,18 +102,15 @@ class CreateAMatrix:
         betas = (np.pi/2 - thetas) + phis.T
 
         # broadcasting distnaces
-        distances_from_center = distances_from_center + np.zeros_like(betas)
+        distances_from_bottom_left = (1 - 1/np.tan(betas)) * (distances_from_center + self.z/2)
         # merge distance and angle into a couple of parameters
-        line_params = np.dstack([distances_from_center, betas]).reshape(-1, 2)
+        line_params = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
 
         return line_params
 
     def create_A_matrix(self):
         line_params = self.generate_lines()
-
-        # change of orgin from center of object to its bottom left
-        # angle beta will remain same
-
+        return np.apply_along_axis(self.get_all_pixel_interepts_from_line, 1, line_params)
 
 
 class SolveEquation:
