@@ -13,7 +13,7 @@ class CreateAMatrix:
         self.r = no_of_rotations
 
         # Assumption: no of rotations are for 1 revolution
-        self.phi = 360 / no_of_rotations
+        self.phi = 2 * np.pi / no_of_rotations
 
         resolution = np.sqrt(no_of_rotations * no_of_detectors)
         # Assumption: n * r will be  square only
@@ -32,7 +32,7 @@ class CreateAMatrix:
         """
         assert d < a, 'd >= a'
 
-        if (d == 0) and beta == np.pi:
+        if (d == 0) and beta == np.pi / 2:
             # vertical edge case
             return a
 
@@ -42,17 +42,17 @@ class CreateAMatrix:
 
         elif d >= 0:
             # enters from base
-            if beta == np.pi:
+            if beta == np.pi / 2:
                 # line parallel to y axis
                 return a
-            elif abs((a - d) / np.tan(beta)) <= a:
+            elif abs((a - d) / np.tan(beta)) < a:
                 return (a - d) / np.cos(beta)
             else:
                 return a / np.sin(beta)
 
         elif d < 0:
             # enters from left pixel
-            if abs((a - d) / np.tan(beta)) <= a:
+            if abs((a - d) / np.tan(beta)) < a:
                 return a / np.cos(beta)
             else:
                 return (a - d / np.cos(beta)) / np.cos(beta)
@@ -60,7 +60,7 @@ class CreateAMatrix:
         else:
             raise Exception
 
-    def get_all_pixel_interepts(self, a, n, d, theta):
+    def get_all_pixel_interepts_from_line(self, a, n, d, theta):
         """
         get all pixel intercepts and make the intercept matrix
         line parameters are taken using one corner as origin
@@ -68,13 +68,47 @@ class CreateAMatrix:
         k = a / n
         assert k.is_integer(), 'k not int'
         k = int(k)
-        A = np.zeros([k, k])
+        intercept_matrix = np.zeros([k, k])
         i = 0
-        while i < n:
-            p1 = d // k
-            A[p1] = self.pixel_intercept(k, d % k, theta)
+        p = d // k
+        d = d % k
+        while i < n and p < n:
+            intercept_matrix[i][p] = self.pixel_intercept(k, d, theta)
 
             # checking when to move on right pixel
+            if theta == 0 or abs((k - d) / np.tan(theta)) < a:
+                p += 1
+                d = p * k - d
+
+            else:
+                i += 1
+                d = (d + k / np.tan(theta))
+
+        return intercept_matrix
+
+    def generate_lines(self):
+        phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
+        thetas = np.array(
+            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1)], ndmin=2)
+
+        # distances from the centre of the object
+        distances_from_center = self.x * np.sin(thetas)
+
+        # beta is slope of line (angle from +ve x-axis)
+        betas = (np.pi/2 - thetas) + phis.T
+
+        # broadcasting distnaces
+        distances_from_center = distances_from_center + np.zeros_like(betas)
+        # merge distance and angle into a couple of parameters
+        line_params = np.dstack([distances_from_center, betas]).reshape(-1, 2)
+
+        return line_params
+
+    def create_A_matrix(self):
+        line_params = self.generate_lines()
+
+        # change of orgin from center of object to its bottom left
+        # angle beta will remain same
 
 
 
