@@ -1,9 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from typing import Tuple
+import numpy as np
 
 
-class CreateAMatrix:
+class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
                  detector_aperture):
         self.n = no_of_detectors
@@ -20,8 +19,8 @@ class CreateAMatrix:
         assert resolution.is_integer(), 'not square resolution'
         self.a = int(resolution)
 
-        # Assumption: detector_aperture << source_to_detector
-        self.theta = detector_aperture / source_to_detector
+        # aperture is detector diameter size
+        self.theta = 2 * np.arctan(detector_aperture / 2 * source_to_detector)
 
     def pixel_intercept(self, a, d, beta):
         """
@@ -63,7 +62,7 @@ class CreateAMatrix:
     def get_all_pixel_interepts_from_line(self, line_params):
         """
         get all pixel intercepts and make the intercept matrix
-        line parameters are taken using one corner as origin
+        line parameters are taken using bottom left corner as origin
         """
         a = self.z
         n = self.a
@@ -91,6 +90,9 @@ class CreateAMatrix:
         return intercept_matrix.flatten()
 
     def generate_lines(self):
+        """
+        will generate parameters of all the lines passing through the object
+        """
         phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
         thetas = np.array(
             [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1)], ndmin=2)
@@ -99,16 +101,17 @@ class CreateAMatrix:
         distances_from_center = self.x * np.sin(thetas)
 
         # beta is slope of line (angle from +ve x-axis)
-        betas = (np.pi/2 - thetas) + phis.T
+        # generate all possible values of beta for different combinations of theta and phi
+        betas = (np.pi / 2 - thetas) + phis.T
 
-        # broadcasting distnaces
-        distances_from_bottom_left = (1 - 1/np.tan(betas)) * (distances_from_center + self.z/2)
+        # changing origin
+        distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (distances_from_center + self.z / 2)
         # merge distance and angle into a couple of parameters
         line_params = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
 
         return line_params
 
-    def create_A_matrix(self):
+    def create_intercept_matrix_from_lines(self):
         line_params = self.generate_lines()
         return np.apply_along_axis(self.get_all_pixel_interepts_from_line, 1, line_params)
 
@@ -125,7 +128,7 @@ class SolveEquation:
         # basic condition for matrix product
         assert A.shape[0] == b.shape[0], 'dimensions not matching'
         self.A_inverse_ = None
-        self.x_ = None
+        self.x = None
 
     def _calculate_inverse(self):
         """
@@ -139,13 +142,13 @@ class SolveEquation:
         """
         if useLibrary:
             self.A_inverse_ = np.linalg.pinv(self.A)
-            self.x_ = np.linalg.lstsq(self.A, self.b, rcond=None)
+            self.x = np.linalg.lstsq(self.A, self.b, rcond=None)
 
         else:
             self._calculate_inverse()
-            self.x_ = self.A_inverse_ @ self.b
+            self.x = self.A_inverse_ @ self.b
 
-        return self.x_
+        return self.x
 
 
 class GenerateImage:
@@ -153,7 +156,7 @@ class GenerateImage:
     display the ouput/ results in image
     """
 
-    def __init__(self, x_vector: np.ndarray, dim: Tuple[int, int]) -> None:
+    def __init__(self, x_vector, dim):
         """
         dim: specify the dimensions of the image. m x_ n image
         x_vector: the vector x_ in the equation. contains solved attenuation constant values
