@@ -20,7 +20,7 @@ class CreateInterceptMatrix:
         self.a = int(resolution)
 
         # aperture is detector diameter size
-        self.theta = 2 * np.arctan(detector_aperture / 2 * source_to_detector)
+        self.theta = 2 * np.arctan(detector_aperture / (2 * source_to_detector))
 
     def pixel_intercept(self, a, d, beta):
         """
@@ -45,16 +45,16 @@ class CreateInterceptMatrix:
                 # line parallel to y axis
                 return a
             elif abs((a - d) / np.tan(beta)) < a:
-                return (a - d) / np.cos(beta)
+                return abs((a - d) / np.cos(beta))
             else:
-                return a / np.sin(beta)
+                return abs(a / np.sin(beta))
 
         elif d < 0:
             # enters from left pixel
             if abs((a - d) / np.tan(beta)) < a:
-                return a / np.cos(beta)
+                return abs(a / np.cos(beta))
             else:
-                return (a - d / np.cos(beta)) / np.cos(beta)
+                return abs((a - d / np.cos(beta)) / np.cos(beta))
 
         else:
             raise Exception
@@ -68,11 +68,9 @@ class CreateInterceptMatrix:
         n = self.a
         d, theta = line_params
         k = a / n
-        assert k.is_integer(), 'k not int'
-        k = int(k)
-        intercept_matrix = np.zeros([k, k])
+        intercept_matrix = np.zeros([n, n])
         i = 0
-        p = d // k
+        p = int(d // k)
         d = d % k
         while i < n and p < n:
             intercept_matrix[i][p] = self.pixel_intercept(k, d, theta)
@@ -95,7 +93,7 @@ class CreateInterceptMatrix:
         """
         phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
         thetas = np.array(
-            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1)], ndmin=2)
+            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1, 2)], ndmin=2)
 
         # distances from the centre of the object
         distances_from_center = self.x * np.sin(thetas)
@@ -107,9 +105,9 @@ class CreateInterceptMatrix:
         # changing origin
         distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (distances_from_center + self.z / 2)
         # merge distance and angle into a couple of parameters
-        line_params = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
+        line_params_array = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
 
-        return line_params
+        return line_params_array
 
     def create_intercept_matrix_from_lines(self):
         line_params = self.generate_lines()
@@ -142,7 +140,7 @@ class SolveEquation:
         """
         if useLibrary:
             self.A_inverse_ = np.linalg.pinv(self.A)
-            self.x = np.linalg.lstsq(self.A, self.b, rcond=None)
+            self.x = np.linalg.lstsq(self.A, self.b, rcond=None)[0]
 
         else:
             self._calculate_inverse()
@@ -156,15 +154,17 @@ class GenerateImage:
     display the ouput/ results in image
     """
 
-    def __init__(self, x_vector, dim):
+    def __init__(self, x_vector, dim=None):
         """
         dim: specify the dimensions of the image. m x_ n image
         x_vector: the vector x_ in the equation. contains solved attenuation constant values
         """
-        self.dim = dim
+        n = np.sqrt(x_vector.size)
+        assert n.is_integer(), 'x_vector incorrect dimensions'
+        n = int(n)
+        self.dim = dim if dim else [n, n]
         self.x_vector = x_vector
-        assert x_vector.size == dim[0] * dim[1], 'dimensions not matching'
-        self.img_matrix = x_vector.reshape(dim)
+        self.img_matrix = np.flip(x_vector.reshape(dim), 0)
 
     def make_figure(self):
         fig, ax = plt.subplots(figsize=(6, 6))
