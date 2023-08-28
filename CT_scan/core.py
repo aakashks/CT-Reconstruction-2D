@@ -167,5 +167,5 @@ class GenerateImage:
 
     def make_figure(self):
         fig, ax = plt.subplots(figsize=(6, 6))
-        ax.imshow(self.img_matrix, cmap='bone')
+        ax.imshow(self.img_matrix, cmap='bone', origin='lower')
         return fig
