@@ -122,7 +122,7 @@ class SolveEquation:
 
     def __init__(self, A, b):
         self.A = A
-        self.b = b.reshape(-1, 1)
+        self.b = b
         # basic condition for matrix product
         assert A.shape[0] == b.shape[0], 'dimensions not matching'
         self.A_inverse_ = None
@@ -139,12 +139,11 @@ class SolveEquation:
         main function to solve the equation
         """
         if useLibrary:
-            self.A_inverse_ = np.linalg.pinv(self.A)
-            self.x = np.linalg.lstsq(self.A, self.b, rcond=None)[0]
+            self.x = np.linalg.lstsq(self.A, self.b.reshape(-1), rcond=None)[0]
 
         else:
-            self._calculate_inverse()
-            self.x = self.A_inverse_ @ self.b
+            # TODO: implement Gauss Elimination method
+            pass
 
         return self.x
 
@@ -164,7 +163,7 @@ class GenerateImage:
         n = int(n)
         self.dim = dim if dim else [n, n]
         self.x_vector = x_vector
-        self.img_matrix = np.flip(x_vector.reshape(dim), 0)
+        self.img_matrix = np.flip(x_vector.reshape(self.dim), 0)
 
     def make_figure(self):
         fig, ax = plt.subplots(figsize=(6, 6))
