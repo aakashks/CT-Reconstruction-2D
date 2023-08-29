@@ -36,7 +36,7 @@ def main():
     lambdas = SolveEquation(A, d).solve(useLibrary='lstsq')
 
     img = GenerateImage(lambdas)
-    fig = img.make_figure()
+    img.make_figure()
     plt.show()
     print('A (intercept matrix):\n', A)
     print('\nattenuation constants: \n', img.img_matrix)

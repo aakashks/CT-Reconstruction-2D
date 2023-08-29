@@ -143,7 +143,9 @@ class GenerateImage:
         self.x_vector = x_vector
         self.img_matrix = x_vector.reshape(self.dim)
 
-    def make_figure(self):
-        fig, ax = plt.subplots(figsize=(6, 6))
+    def make_figure(self, ax=None):
+        if not ax:
+            fig, ax = plt.subplots(figsize=(6, 6))
+        else:
+            ax = ax
         ax.imshow(self.img_matrix, cmap='bone', origin='lower')
-        return fig
