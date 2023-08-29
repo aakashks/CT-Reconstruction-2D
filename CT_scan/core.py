@@ -8,7 +8,7 @@ class CreateInterceptMatrix:
         self.n = no_of_detectors
         self.x = source_to_object
         self.y = source_to_detector
-        self.z = size_of_object  # basically the size of square image actually (which would fit the object inside it)
+        self.z = size_of_object  # basically the length of side of square image  (which would fit the object inside it)
         self.r = no_of_rotations
 
         # Assumption: no of rotations are for 1 revolution
@@ -83,7 +83,7 @@ class CreateInterceptMatrix:
         betas = (np.pi / 2 - thetas) + phis.T
 
         # changing origin
-        distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (distances_from_center + self.z / 2)
+        distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (self.z / 2) + distances_from_center/np.sin(betas)
         # merge distance and angle into a couple of parameters
         line_params_array = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
 
