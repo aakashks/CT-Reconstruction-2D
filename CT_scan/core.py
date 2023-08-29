@@ -8,7 +8,7 @@ class CreateInterceptMatrix:
         self.n = no_of_detectors
         self.x = source_to_object
         self.y = source_to_detector
-        self.z = size_of_object
+        self.z = size_of_object  # basically the size of square image actually (which would fit the object inside it)
         self.r = no_of_rotations
 
         # Assumption: no of rotations are for 1 revolution
@@ -22,67 +22,46 @@ class CreateInterceptMatrix:
         # aperture is detector diameter size
         self.theta = 2 * np.arctan(detector_aperture / (2 * source_to_detector))
 
-    def pixel_intercept(self, a, d, beta):
-        """
-        in 1 pixel calculate the length of intercept given pixel size, and line parameters taking
-        one corner of the pixel as origin
-        equation of line y = tan(theta) (x-d)
-        d < a   (must be ensured)
-        """
-        assert d < a, 'd >= a'
-
-        if (d == 0) and beta == np.pi / 2:
-            # vertical edge case
-            return a
-
-        elif beta == 0:
-            # horizontal edge case
-            return a
-
-        elif d >= 0:
-            # enters from base
-            if beta == np.pi / 2:
-                # line parallel to y axis
-                return a
-            elif abs((a - d) / np.tan(beta)) < a:
-                return abs((a - d) / np.cos(beta))
-            else:
-                return abs(a / np.sin(beta))
-
-        elif d < 0:
-            # enters from left pixel
-            if abs((a - d) / np.tan(beta)) < a:
-                return abs(a / np.cos(beta))
-            else:
-                return abs((a - d / np.cos(beta)) / np.cos(beta))
-
-        else:
-            raise Exception
-
-    def get_all_pixel_interepts_from_line(self, line_params):
+    def calculate_intercepts_from_line(self, line_params):
         """
         get all pixel intercepts and make the intercept matrix
         line parameters are taken using bottom left corner as origin
         """
-        a = self.z
-        n = self.a
         d, theta = line_params
-        k = a / n
-        intercept_matrix = np.zeros([n, n])
-        i = 0
-        p = int(d // k)
-        d = d % k
-        while i < n and p < n:
-            intercept_matrix[i][p] = self.pixel_intercept(k, d, theta)
 
-            # checking when to move on right pixel
-            if theta == 0 or abs((k - d) / np.tan(theta)) < a:
-                p += 1
-                d = p * k - d
+        # Make pixel grid
+        # each pixel is represented by its bottom left corner coordinate
+        # use resolution and object size to make the
+        x = np.linspace(0, self.z, self.a, endpoint=False)
+        X, Y = np.meshgrid(x, x)
 
-            else:
-                i += 1
-                d = (d + k / np.tan(theta))
+        line_from_x = lambda x: np.tan(theta) * (x - d)
+        line_from_y = lambda y: y / np.tan(theta) + d
+
+        # Get line intercepts with 4 boundaries of each pixel
+        Y_left = line_from_x(X)
+        Y_right = line_from_x(X + 1)
+        X_down = line_from_y(Y)
+        X_up = line_from_y(Y + 1)
+
+        Il = np.dstack([np.where(np.logical_and(Y <= Y_left, Y_left < Y + 1), X, 0),
+                        np.where(np.logical_and(Y <= Y_left, Y_left < Y + 1), Y_left, 0)])
+
+        Ir = np.dstack([np.where(np.logical_and(Y <= Y_right, Y_right < Y + 1), X + 1, 0),
+                        np.where(np.logical_and(Y <= Y_right, Y_right < Y + 1), Y_right, 0)])
+
+        Id = np.dstack([np.where(np.logical_and(X <= X_down, X_down < X + 1), X_down, 0),
+                        np.where(np.logical_and(X <= X_down, X_down < X + 1), Y, 0)])
+
+        Iu = np.dstack([np.where(np.logical_and(X <= X_up, X_up < X + 1), X_up, 0),
+                        np.where(np.logical_and(X <= X_up, X_up < X + 1), Y + 1, 0)])
+
+        # To get length of line from all these intercept coordinates
+        # first do |x1 - x2|, |y1 - y2| for intercept to any boundary
+        intercept_coordinates = np.abs(np.abs(Il - Ir) - np.abs(Id - Iu))
+
+        # now squaring will give the length
+        intercept_matrix = np.apply_along_axis(lambda c: np.sqrt(c[0] ** 2 + c[1] ** 2), 2, intercept_coordinates)
 
         # change to 1d vector
         return intercept_matrix.flatten()
@@ -93,7 +72,8 @@ class CreateInterceptMatrix:
         """
         phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
         thetas = np.array(
-            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1, 2)], ndmin=2)
+            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1, 2)],
+            ndmin=2)
 
         # distances from the centre of the object
         distances_from_center = self.x * np.sin(thetas)
@@ -110,8 +90,8 @@ class CreateInterceptMatrix:
         return line_params_array
 
     def create_intercept_matrix_from_lines(self):
-        line_params = self.generate_lines()
-        return np.apply_along_axis(self.get_all_pixel_interepts_from_line, 1, line_params)
+        line_params_array = self.generate_lines()
+        return np.apply_along_axis(self.calculate_intercepts_from_line, 1, line_params_array)
 
 
 class SolveEquation:
@@ -163,7 +143,7 @@ class GenerateImage:
         n = int(n)
         self.dim = dim if dim else [n, n]
         self.x_vector = x_vector
-        self.img_matrix = np.flip(x_vector.reshape(self.dim), 0)
+        self.img_matrix = x_vector.reshape(self.dim)
 
     def make_figure(self):
         fig, ax = plt.subplots(figsize=(6, 6))
