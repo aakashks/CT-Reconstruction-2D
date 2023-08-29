@@ -33,6 +33,7 @@ class CreateInterceptMatrix:
         # each pixel is represented by its bottom left corner coordinate
         # use resolution and object size to make the
         x = np.linspace(0, self.z, self.a, endpoint=False)
+        k = self.z / self.a
         X, Y = np.meshgrid(x, x)
 
         line_from_x = lambda x: np.tan(theta) * (x - d)
@@ -40,21 +41,21 @@ class CreateInterceptMatrix:
 
         # Get line intercepts with 4 boundaries of each pixel
         Y_left = line_from_x(X)
-        Y_right = line_from_x(X + 1)
+        Y_right = line_from_x(X + k)
         X_down = line_from_y(Y)
-        X_up = line_from_y(Y + 1)
+        X_up = line_from_y(Y + k)
 
-        Il = np.dstack([np.where(np.logical_and(Y <= Y_left, Y_left < Y + 1), X, 0),
-                        np.where(np.logical_and(Y <= Y_left, Y_left < Y + 1), Y_left, 0)])
+        Il = np.dstack([np.where(np.logical_and(Y <= Y_left, Y_left < Y + k), X, 0),
+                        np.where(np.logical_and(Y <= Y_left, Y_left < Y + k), Y_left, 0)])
 
-        Ir = np.dstack([np.where(np.logical_and(Y <= Y_right, Y_right < Y + 1), X + 1, 0),
-                        np.where(np.logical_and(Y <= Y_right, Y_right < Y + 1), Y_right, 0)])
+        Ir = np.dstack([np.where(np.logical_and(Y <= Y_right, Y_right < Y + k), X + k, 0),
+                        np.where(np.logical_and(Y <= Y_right, Y_right < Y + k), Y_right, 0)])
 
-        Id = np.dstack([np.where(np.logical_and(X <= X_down, X_down < X + 1), X_down, 0),
-                        np.where(np.logical_and(X <= X_down, X_down < X + 1), Y, 0)])
+        Id = np.dstack([np.where(np.logical_and(X <= X_down, X_down < X + k), X_down, 0),
+                        np.where(np.logical_and(X <= X_down, X_down < X + k), Y, 0)])
 
-        Iu = np.dstack([np.where(np.logical_and(X <= X_up, X_up < X + 1), X_up, 0),
-                        np.where(np.logical_and(X <= X_up, X_up < X + 1), Y + 1, 0)])
+        Iu = np.dstack([np.where(np.logical_and(X <= X_up, X_up < X + k), X_up, 0),
+                        np.where(np.logical_and(X <= X_up, X_up < X + k), Y + k, 0)])
 
         # To get length of line from all these intercept coordinates
         # first do |x1 - x2|, |y1 - y2| for intercept to any boundary
@@ -83,7 +84,7 @@ class CreateInterceptMatrix:
         betas = (np.pi / 2 - thetas) + phis.T
 
         # changing origin
-        distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (self.z / 2) + distances_from_center/np.sin(betas)
+        distances_from_bottom_left = (1 - 1 / np.tan(betas)) * (self.z / 2) + distances_from_center / np.sin(betas)
         # merge distance and angle into a couple of parameters
         line_params_array = np.dstack([distances_from_bottom_left, betas]).reshape(-1, 2)
 
@@ -108,18 +109,16 @@ class SolveEquation:
         self.A_inverse_ = None
         self.x = None
 
-    def _calculate_inverse(self):
-        """
-        calc A inverse
-        """
-        self.A_inverse_ = np.linalg.pinv(self.A)
-
     def solve(self, useLibrary=False):
         """
         main function to solve the equation
         """
-        if useLibrary:
+        if useLibrary == 'lstsq':
             self.x = np.linalg.lstsq(self.A, self.b.reshape(-1), rcond=None)[0]
+
+        elif useLibrary == 'pinv':
+            self.A_inverse_ = np.linalg.pinv(self.A)
+            self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
         else:
             # TODO: implement Gauss Elimination method
