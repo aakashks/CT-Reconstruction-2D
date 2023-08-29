@@ -22,7 +22,7 @@ def main():
     # detector_readings = pd.read_csv('./readings.csv', header=None).to_numpy()
 
     # if readings has detector no and orientations
-    detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Detector_no', 'Rotation_no'])['Reading'].to_numpy()
+    detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Rotation_no', 'Detector_no'])['Reading'].to_numpy()
 
     # # TEMPORARY: inputting from user
     # readings = input('Enter space separated readings: ')

@@ -4,5 +4,6 @@
   "source_to_detector": 20,
   "size_of_object": 4,
   "no_of_rotations": 2,
-  "detector_aperture": 7.053079228338599
+  "detector_aperture": 7.053079228338599,
+  "resolution": null
 }

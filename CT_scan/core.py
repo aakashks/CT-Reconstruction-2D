@@ -4,7 +4,7 @@ import numpy as np
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
-                 detector_aperture):
+                 detector_aperture, resolution):
         self.n = no_of_detectors
         self.x = source_to_object
         self.y = source_to_detector
@@ -14,9 +14,8 @@ class CreateInterceptMatrix:
         # Assumption: no of rotations are for 1 revolution
         self.phi = 2 * np.pi / no_of_rotations
 
-        resolution = np.sqrt(no_of_rotations * no_of_detectors)
-        # Assumption: n * r will be  square only
-        assert resolution.is_integer(), 'not square resolution'
+        # square n x n resolution
+        resolution = resolution if resolution else np.sqrt(no_of_rotations * no_of_detectors)
         self.a = int(resolution)
 
         # aperture is detector diameter size
@@ -122,7 +121,7 @@ class SolveEquation:
 
         else:
             # TODO: implement Gauss Elimination method
-            pass
+            assert False, 'method not specified'
 
         return self.x
 
