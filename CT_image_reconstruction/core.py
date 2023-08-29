@@ -72,7 +72,9 @@ class CreateInterceptMatrix:
         """
         phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
         thetas = np.array(
-            [(i if self.n % 2 == 1 else i / 2) * self.theta for i in range(-(self.n // 2), self.n // 2 + 1, 2)],
+            [i / 2 * self.theta for i in range(-self.n + 1, self.n, 2)]
+            if self.n % 2 == 0 else
+            [i * self.theta for i in range(-(self.n // 2), self.n // 2 + 1)],
             ndmin=2)
 
         # distances from the centre of the object
