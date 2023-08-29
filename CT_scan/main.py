@@ -18,7 +18,11 @@ def main():
 
     # storing detector readings in the b vector
     # TODO: -TEMPORARY- readings are directly ln(I_o/I) values
-    detector_readings = pd.read_csv('./readings.csv', header=None).to_numpy()
+    # # only readings
+    # detector_readings = pd.read_csv('./readings.csv', header=None).to_numpy()
+
+    # if readings has detector no and orientations
+    detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Detector_no', 'Rotation_no'])['Reading'].to_numpy()
 
     # # TEMPORARY: inputting from user
     # readings = input('Enter space separated readings: ')
@@ -29,7 +33,7 @@ def main():
     A = CreateInterceptMatrix(**params).create_intercept_matrix_from_lines()
 
     # TEMPORARILY using libraries for solving equation
-    lambdas = SolveEquation(A, d).solve(useLibrary=True)
+    lambdas = SolveEquation(A, d).solve(useLibrary='lstsq')
 
     img = GenerateImage(lambdas)
     fig = img.make_figure()
