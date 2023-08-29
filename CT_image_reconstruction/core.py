@@ -110,6 +110,34 @@ class SolveEquation:
         self.A_inverse_ = None
         self.x = None
 
+    def gauss_elimination(self, A, b):
+        n = len(b)
+
+        # augmenting A matrix with b
+        aug_matrix = np.hstack((A, b.reshape(-1, 1)))
+
+        # Forward elimination
+        for i in range(n):
+            # partial pivoting
+            max_row = i + np.argmax(np.abs(aug_matrix[i:, i]))
+            aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
+
+            pivot = aug_matrix[i, i]
+            assert pivot != 0, 'singular / near-singular matrix'
+
+            aug_matrix[i, :] /= pivot
+
+            for j in range(i + 1, n):
+                factor = aug_matrix[j, i]
+                aug_matrix[j, :] -= factor * aug_matrix[i, :]
+
+        # Backward substitution
+        x = np.zeros(n)
+        for i in range(n - 1, -1, -1):
+            x[i] = aug_matrix[i, -1] - np.dot(aug_matrix[i, i + 1:n], x[i + 1:n])
+
+        return x
+
     def solve(self, useLibrary=False):
         """
         main function to solve the equation
@@ -122,8 +150,7 @@ class SolveEquation:
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
         else:
-            # TODO: implement Gauss Elimination method
-            assert False, 'method not specified'
+            self.x = self.gauss_elimination(self.A, self.b)
 
         return self.x
 
