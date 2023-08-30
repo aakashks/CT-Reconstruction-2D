@@ -13,12 +13,13 @@ $\lambda$ is the flattened image of the material (attenuation constant data), wh
 $d$ is made using the given intensity $I_o$ of the  radiation source and the intensities observed by the detectors $I$.
 Hence, $d$ becomes $$d=\ln(\frac{I_o}{I})$$
 
+## Experiment Geometry
+<img src="../assets/ct_reconstruction_apparatus.png" height="500">
+
 ## Code
-The whole code except of gaussian elimination uses numpy vectorized operations and hence is effecient. The code first generates lines corresponding to the path of radiation through the object and then calculates intercept matrix using those lines.
+The whole code except of gaussian elimination uses numpy vectorized operations and hence is effecient. The code first generates lines corresponding to the path of radiation through the object and then calculates intercept of those lines on every pixel.
 
 ## References
 
-<https://www.sciencedirect.com/science/article/pii/S0939388923000880#s0075/> \
-<https://radiologykey.com/imaging-principles-in-computed-tomography/> \
-<https://imaging.rigaku.com/blog/how-does-ct-reconstruction-work/> \
-<https://www.sciencedirect.com/science/article/pii/S0939388923000880/>
+[Original experiment paper](https://www.sciencedirect.com/science/article/pii/S0939388923000880)\
+[line intercept algorithm ](https://stackoverflow.com/questions/3609382/calculating-the-length-of-intersections-through-a-2d-grid)

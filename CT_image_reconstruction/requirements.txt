@@ -1,0 +1,8 @@
+numpy
+matplotlib
+json
+pandas
+
+# required only for testing shepp logan
+pillow
+imageio
