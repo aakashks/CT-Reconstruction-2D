@@ -10,10 +10,15 @@ the problem reduces to
 $$A \lambda = d$$
 where, $A$ is the matrix containing information about the intercept of x-rays on the material.
 $\lambda$ is the flattened image of the material (attenuation constant data), which will be the final output.
-$d$ is made using the given intensity $I_o$ of the  radiation source and
+$d$ is made using the given intensity $I_o$ of the  radiation source and the intensities observed by the detectors $I$.
+Hence, $d$ becomes $$d=\ln(\frac{I_o}{I})$$
+
+## Code
+The whole code except of gaussian elimination uses numpy vectorized operations and hence is effecient. The code first generates lines corresponding to the path of radiation through the object and then calculates intercept matrix using those lines.
 
 ## References
 
-<https://radiologykey.com/imaging-principles-in-computed-tomography/>
-<https://imaging.rigaku.com/blog/how-does-ct-reconstruction-work/>
+<https://www.sciencedirect.com/science/article/pii/S0939388923000880#s0075/> \
+<https://radiologykey.com/imaging-principles-in-computed-tomography/> \
+<https://imaging.rigaku.com/blog/how-does-ct-reconstruction-work/> \
 <https://www.sciencedirect.com/science/article/pii/S0939388923000880/>
