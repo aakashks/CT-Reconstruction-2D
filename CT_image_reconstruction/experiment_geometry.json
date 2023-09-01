@@ -1,9 +1,10 @@
 {
-  "no_of_detectors": 2,
-  "source_to_object": 8,
-  "source_to_detector": 20,
-  "size_of_object": 4,
-  "no_of_rotations": 2,
-  "detector_aperture": 7.053079228338599,
-  "resolution": null
+  "no_of_detectors": 5,
+  "source_to_object": 12.5,
+  "source_to_detector": 35,
+  "size_of_object": 12,
+  "no_of_rotations": 18,
+  "angle_bw_detectors": 0.13,
+  "resolution": 9,
+  "source_intensity": 0.662
 }

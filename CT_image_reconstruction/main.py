@@ -16,19 +16,18 @@ def main():
     # no_of_rotations = int(input("Enter no_of_rotations: "))
     # detector_aperture = float(input("Enter detector_aperture: "))
 
+    # assuming it is in MeV
+    source_intensity = params.get('source_intensity', None)
+
     # storing detector readings in the b vector
-    # TODO: -TEMPORARY- readings are directly ln(I_o/I) values
-    # # only readings
-    # detector_readings = pd.read_csv('./readings.csv', header=None).to_numpy()
 
-    # if readings has detector no and orientations
-    detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Rotation_no', 'Detector_no'])['Reading'].to_numpy()
+    # # if readings has detector no and orientations
+    # detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Rotation_no', 'Detector_no'])['Reading'].to_numpy()
 
-    # # TEMPORARY: inputting from user
-    # readings = input('Enter space separated readings: ')
-    # detector_readings = np.array(readings.split(), dtype='float')
-
-    d = detector_readings.reshape(-1, 1)
+    # readings where 1 column is 1 rotation
+    raw_data = pd.read_csv('./Proj_gamma_photo_peak.csv', header=None)
+    detector_readings = raw_data.to_numpy().T.flatten()
+    d = np.log(source_intensity / detector_readings)
 
     A = CreateInterceptMatrix(**params).create_intercept_matrix_from_lines()
 

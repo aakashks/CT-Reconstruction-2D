@@ -4,7 +4,7 @@ import numpy as np
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
-                 detector_aperture, resolution):
+                 source_intensity=None, detector_aperture=None, angle_bw_detectors=None, resolution=None):
         self.n = no_of_detectors
         self.x = source_to_object
         self.y = source_to_detector
@@ -18,8 +18,11 @@ class CreateInterceptMatrix:
         resolution = resolution if resolution else np.sqrt(no_of_rotations * no_of_detectors)
         self.a = int(resolution)
 
+        assert (detector_aperture is not None or angle_bw_detectors is not None), 'theta can\'t be found'
+
         # aperture is detector diameter size
-        self.theta = 2 * np.arctan(detector_aperture / (2 * source_to_detector))
+        # in radians
+        self.theta = angle_bw_detectors if angle_bw_detectors else 2 * np.arctan(detector_aperture / (2 * source_to_detector))
 
     def calculate_intercepts_from_line(self, line_params):
         """

@@ -21,5 +21,4 @@ The whole code except of gaussian elimination uses numpy vectorized operations a
 
 ## References
 
-[Original experiment paper](https://www.sciencedirect.com/science/article/pii/S0939388923000880)\
-[line intercept algorithm ](https://stackoverflow.com/questions/3609382/calculating-the-length-of-intersections-through-a-2d-grid)
+[Original experiment paper](https://www.sciencedirect.com/science/article/pii/S0939388923000880)
