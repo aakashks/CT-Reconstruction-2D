@@ -4,7 +4,7 @@
   "source_to_detector": 35,
   "size_of_object": 12,
   "no_of_rotations": 18,
-  "angle_bw_detectors": 0.13,
-  "resolution": 9,
+  "angle_bw_detectors": 0.16188,
+  "resolution": 15,
   "source_intensity": 0.662
 }

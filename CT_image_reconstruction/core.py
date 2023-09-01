@@ -4,9 +4,9 @@ import numpy as np
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
-                 source_intensity=None, detector_aperture=None, angle_bw_detectors=None, resolution=None):
+                 detector_aperture=None, angle_bw_detectors=None, resolution=None):
         self.n = no_of_detectors
-        self.x = source_to_object
+        self.x = source_to_object  # source to the centre of object
         self.y = source_to_detector
         self.z = size_of_object  # basically the length of side of square image  (which would fit the object inside it)
         self.r = no_of_rotations

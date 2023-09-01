@@ -16,8 +16,9 @@ def main():
     # no_of_rotations = int(input("Enter no_of_rotations: "))
     # detector_aperture = float(input("Enter detector_aperture: "))
 
-    # assuming it is in MeV
+    # assuming readings are in MeV
     source_intensity = params.get('source_intensity', None)
+    del params['source_intensity']
 
     # storing detector readings in the b vector
 
@@ -37,8 +38,7 @@ def main():
     img = GenerateImage(lambdas)
     img.make_figure()
     plt.show()
-    print('A (intercept matrix):\n', A)
-    print('\nattenuation constants: \n', img.img_matrix)
+    print('A (intercept matrix):\n', A.shape)
 
 
 if __name__ == '__main__':
