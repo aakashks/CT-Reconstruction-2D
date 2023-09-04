@@ -21,8 +21,7 @@ def plot_images(img1, img2, show_rmse=True, figsize=(12, 5)):
     fig.tight_layout()
 
     if show_rmse:
-        total_pixels = img1.size
-        rmse = np.sqrt(np.mean((img1 - img2) ** 2)) / total_pixels
+        rmse = np.sqrt(np.mean((img1 - img2) ** 2))
         plt.suptitle(f'RMSE: {rmse:.4f}', y=1.02)
 
     plt.show()
