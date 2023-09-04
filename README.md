@@ -14,7 +14,7 @@ $d$ is made using the given intensity $I_o$ of the  radiation source and the int
 Hence, $d$ becomes $$d=\ln(\frac{I_o}{I})$$
 
 ## Experiment Geometry
-<img src="assets/ct_reconstruction_apparatus.png" height="500">
+<img src="assets/ct_reconstruction_apparatus.png" height="500"/>
 
 ## Code
 The whole code except of gaussian elimination uses numpy vectorized operations and hence is effecient. The code first generates lines corresponding to the path of radiation through the object and then calculates intercept of those lines on every pixel.
