@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 
 
@@ -158,26 +159,27 @@ class SolveEquation:
         return self.x
 
 
-class GenerateImage:
-    """
-    display the ouput/ results in image
-    """
+# Plotting Utility functions
+def plot_image(img):
+    sns.heatmap(img, cmap='viridis', xticklabels=False, yticklabels=False)
+    plt.tight_layout()
+    plt.show()
 
-    def __init__(self, x_vector, dim=None):
-        """
-        dim: specify the dimensions of the image. m x_ n image
-        x_vector: the vector x_ in the equation. contains solved attenuation constant values
-        """
-        n = np.sqrt(x_vector.size)
-        assert n.is_integer(), 'x_vector incorrect dimensions'
-        n = int(n)
-        self.dim = dim if dim else [n, n]
-        self.x_vector = x_vector
-        self.img_matrix = x_vector.reshape(self.dim)
 
-    def make_figure(self, ax=None):
-        if not ax:
-            fig, ax = plt.subplots(figsize=(6, 6))
-        else:
-            ax = ax
-        ax.imshow(self.img_matrix, cmap='bone', origin='lower')
+def plot_images(img1, img2, show_rmse=True, figsize=(12, 5)):
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+
+    # Rescaling both images
+    [img1, img2] = [(x - x.min()) / (x.max() - x.min()) for x in [img1, img2]]
+
+    for ax, img in zip(axes, [img1, img2]):
+        sns.heatmap(img, cmap='viridis', ax=ax, xticklabels=False, yticklabels=False)
+
+    fig.tight_layout()
+
+    if show_rmse:
+        total_pixels = img1.size
+        rmse = np.sqrt(np.mean((img1 - img2) ** 2)) / total_pixels
+        plt.suptitle(f'RMSE: {rmse:.4f}', y=1.02)
+
+    plt.show()

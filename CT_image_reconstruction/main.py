@@ -17,8 +17,7 @@ def main():
     # detector_aperture = float(input("Enter detector_aperture: "))
 
     # assuming readings are in MeV
-    source_intensity = params.get('source_intensity', None)
-    del params['source_intensity']
+    source_intensity = 0.662
 
     # storing detector readings in the b vector
 
@@ -35,9 +34,7 @@ def main():
     # TEMPORARILY using libraries for solving equation
     lambdas = SolveEquation(A, d).solve(useLibrary='lstsq')
 
-    img = GenerateImage(lambdas)
-    img.make_figure()
-    plt.show()
+    plot_image(lambdas.reshape(int(np.sqrt(len(lambdas))), -1))
     print('A (intercept matrix):\n', A.shape)
 
 
