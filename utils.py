@@ -10,7 +10,7 @@ def plot_image(img, cmap="viridis"):
 
 
 def plot_images(
-        recon_img, orig_img, show_rmse=True, rescale_for_rmse=True, cmap="viridis", figsize=(12, 5)
+        recon_img, orig_img, show_rmse=True, rescale_for_rmse=True, title='', cmap="viridis", figsize=(12, 5)
 ):
     fig, axes = plt.subplots(1, 2, figsize=figsize)
 
@@ -28,6 +28,6 @@ def plot_images(
                 (x - x.min()) / (x.max() - x.min()) for x in [recon_img, orig_img]
             ]
         rmse = np.sqrt(np.mean((recon_img - orig_img) ** 2))
-        plt.suptitle(f"RMSE: {rmse:.4f}", y=1.02)
+        plt.suptitle(f"{title}RMSE: {rmse:.4f}", y=1.02)
 
     plt.show()
