@@ -71,13 +71,15 @@ class CreateInterceptMatrix:
     def generate_lines(self):
         """
         will generate parameters of all the lines passing through the object
+        lines are generated such 0th axis ie. rows have readings from same detector but different rotation angles
+
+        [[d1-r1, d1-r2, d1-r3], [d2-r1, d2-r2, d3-r3]]
         """
-        phis = np.array([i * self.phi for i in range(self.r)], ndmin=2)
-        thetas = np.array(
-            [i / 2 * self.theta for i in range(-self.n + 1, self.n, 2)]
-            if self.n % 2 == 0 else
-            [i * self.theta for i in range(-(self.n // 2), self.n // 2 + 1)],
-            ndmin=2)
+        phis = (np.arange(self.r) * self.phi).reshape(-1, 1)
+        thetas = np.arange(-self.n + 1, self.n, 2) * self.theta / 2 \
+            if self.n % 2 == 0 else (
+                np.arange(-(self.n // 2), self.n // 2 + 1) * self.theta)
+        thetas = thetas.reshape(-1, 1)
 
         # distances from the centre of the object
         distances_from_center = self.x * np.sin(thetas)
