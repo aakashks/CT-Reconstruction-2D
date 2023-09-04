@@ -1,0 +1,9 @@
+{
+  "no_of_detectors": 32,
+  "source_to_object": 20,
+  "source_to_detector": 42,
+  "size_of_object": 12,
+  "no_of_rotations": 32,
+  "fan_beam_angle": 14.67,
+  "resolution": 32
+}
