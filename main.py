@@ -1,4 +1,5 @@
 from core import *
+from utils import *
 import pandas as pd
 import json
 
@@ -26,7 +27,7 @@ def main():
 
     # readings where 1 column is 1 rotation
     raw_data = pd.read_csv('exp_data_1/Proj_gamma_photo_peak.csv', header=None)
-    detector_readings = raw_data.to_numpy().T.flatten()
+    detector_readings = raw_data.to_numpy().flatten()
     d = np.log(source_intensity / detector_readings)
 
     A = CreateInterceptMatrix(**params).create_intercept_matrix_from_lines()
