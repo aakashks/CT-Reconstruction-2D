@@ -5,7 +5,7 @@ import json
 
 def main():
     # INPUT using experiment_geometry.json file
-    with open('../exp_data_1/experiment_geometry.json') as fp:
+    with open('exp_data_1/experiment_geometry.json') as fp:
         params = json.load(fp)
 
     # # INPUT from user
@@ -25,7 +25,7 @@ def main():
     # detector_readings = pd.read_csv('./full_readings.csv').sort_values(by=['Rotation_no', 'Detector_no'])['Reading'].to_numpy()
 
     # readings where 1 column is 1 rotation
-    raw_data = pd.read_csv('../exp_data_1/Proj_gamma_photo_peak.csv', header=None)
+    raw_data = pd.read_csv('exp_data_1/Proj_gamma_photo_peak.csv', header=None)
     detector_readings = raw_data.to_numpy().T.flatten()
     d = np.log(source_intensity / detector_readings)
 
