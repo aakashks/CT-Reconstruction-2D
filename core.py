@@ -3,11 +3,23 @@ import numpy as np
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
-                 detector_aperture=None, angle_bw_detectors=None, resolution=None):
+                 angle_bw_detectors, resolution=None):
+        """
+        Parameters
+        ----------
+        source_to_object
+            source to the centre of object
+        source_to_detector
+            source to any detector's centre (all detectors should be equidistance from source)
+        size_of_object
+            basically the length of side of square image  (which would fit the object inside it)
+        angle_bw_detectors
+            angle between centres of any 2 detectors
+        """
         self.n = no_of_detectors
-        self.x = source_to_object  # source to the centre of object
+        self.x = source_to_object
         self.y = source_to_detector
-        self.z = size_of_object  # basically the length of side of square image  (which would fit the object inside it)
+        self.z = size_of_object
         self.r = no_of_rotations
 
         # Assumption: no of rotations are for 1 revolution
@@ -17,11 +29,8 @@ class CreateInterceptMatrix:
         resolution = resolution if resolution else np.sqrt(no_of_rotations * no_of_detectors)
         self.a = int(resolution)
 
-        assert (detector_aperture is not None or angle_bw_detectors is not None), 'theta can\'t be found'
-
-        # aperture is detector diameter size
         # in radians
-        self.theta = angle_bw_detectors if angle_bw_detectors else 2 * np.arctan(detector_aperture / (2 * source_to_detector))
+        self.theta = angle_bw_detectors
 
     def calculate_intercepts_from_line(self, line_params):
         """
@@ -151,6 +160,10 @@ class SolveEquation:
 
         elif useLibrary == 'pinv':
             self.A_inverse_ = np.linalg.pinv(self.A)
+            self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
+
+        elif useLibrary == 'inv':
+            self.A_inverse_ = np.linalg.inv(self.A)
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
         else:
