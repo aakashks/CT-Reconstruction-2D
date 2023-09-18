@@ -19,15 +19,25 @@ class Solution:
         self.k = k
 
 
-def general_soln(A, b, tol=1e-6):
+def general_soln(A, b, tol=1e-6, round_off=None):
     """
     reduce A | b to R | d to
     get a general solution of Ax = b where A rk(A) = rk(A|b) < min(m, n) in terms of x particular and x nullspace
     A may be rectangular matrix
     in case of full rank square (invertible) matrix x particular is the exact solution
 
-    for free variables stored in free_variables = [x2, x4.. ] like this
-    solution space will be x_partcular + x_nullspace @ free_variables
+    for free variables [x2, x4.. ]
+    solution space will be x_partcular + x_nullspace @ free_variables [1]
+
+    Parameters
+    ----------
+    tol: float, optional
+        value below which consider element as 0
+        is kept 0 when round is specified
+
+    round_off: int, optional
+        rounds off both A and b to this many decimal places.
+        controls the decimal param of np.round()
 
     Returns
     -------
@@ -40,11 +50,18 @@ def general_soln(A, b, tol=1e-6):
 
     References
     ----------
-    G. Strang 3.4-The complete solution to Ax = b p.g. 155.
+    .. [1] G. Strang, Intro to Linear Algebra,
+           3.4 The complete solution to Ax = b, page 155.
+
     """
     b = b.reshape(-1, 1)
     # Augmenting both matrices
     aug_matrix = np.hstack([A, b]).astype('float64')
+
+    if round_off is not None:
+        aug_matrix = np.round(aug_matrix, decimals=round_off)
+        tol = 0
+
     m, n = A.shape
     if m != b.shape[0]:
         raise ValueError('wrong shapes of A and b')
@@ -71,7 +88,7 @@ def general_soln(A, b, tol=1e-6):
 
         pivot = aug_matrix[i, k]
 
-        while abs(pivot) < tol and k < n:
+        while abs(pivot) <= tol and k < n:
             # corresopnding free variable be 1 rest 0
             id_col = np.zeros([n, 1])
             id_col[k, 0] = 1
@@ -117,7 +134,7 @@ def general_soln(A, b, tol=1e-6):
         X_n = np.hstack([X_n, id_col])
 
     # check if rk(A|b) > rk(A)
-    if (np.abs(aug_matrix[rank:, n]) >= tol).any():
+    if (np.abs(aug_matrix[rank:, n]) > tol).any():
         raise ValueError('inconsistent system!!')
 
     ctr = 0
