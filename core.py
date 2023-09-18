@@ -1,5 +1,4 @@
-import numpy as np
-from linear_algebra import *
+from linear_algebra.gauss_elimination import *
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
