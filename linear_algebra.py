@@ -3,7 +3,7 @@ import numpy as np
 
 class Solution:
     """
-    object having all details of the equation
+    object having all properties of the solved equation
     """
     def __init__(self, A, b, aug_matrix, pivot_list, rank, x_p, X_n, k):
         self.A = A
@@ -55,7 +55,7 @@ def general_soln(A, b, tol=1e-6):
     X_n = np.zeros([n, 0])
 
     # free columns (non-pivot columns)
-    free_col = np.empty([m, 0])
+    free_cols = np.empty([m, 0])
 
     pivot_list = []
 
@@ -63,12 +63,12 @@ def general_soln(A, b, tol=1e-6):
     # k will track column of pivot
     k = -1
     for i in range(m):
+        k += 1
         # partial pivoting
         max_row = i + np.argmax(np.abs(aug_matrix[i:, k]))
         if max_row != i:
             aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
 
-        k += 1
         pivot = aug_matrix[i, k]
 
         while abs(pivot) < tol and k < n:
@@ -78,25 +78,28 @@ def general_soln(A, b, tol=1e-6):
             X_n = np.hstack([X_n, id_col])
 
             # store free columns
-            free_col = np.hstack([free_col, -aug_matrix[:, k].reshape(-1, 1)])
+            free_cols = np.hstack([free_cols, -aug_matrix[:, k].reshape(-1, 1)])
             k += 1
 
             # if this row has no pivot (all 0 elements)
             if k == n:
                 break
+
+            # partial pivoting
+            max_row = i + np.argmax(np.abs(aug_matrix[i:, k]))
+            if max_row != i:
+                aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
+
             pivot = aug_matrix[i, k]
 
         if k < n:
             # make piot 1
-            aug_matrix[i, :] /= pivot
-
-            for j in range(0, m):
-                # make all elements 0 in pivot row (RREF)
-                if j == i:
-                    continue
-                factor = aug_matrix[j, k]
-                aug_matrix[j, :] -= factor * aug_matrix[i, :]
-
+            aug_matrix[i, :] = aug_matrix[i, :] / pivot
+            # make all elements 0 in pivot column (RREF)
+            piv_row = aug_matrix[i, :].reshape(-1, 1)
+            factors = aug_matrix[:, k].reshape(-1, 1)
+            aug_matrix = aug_matrix - factors @ piv_row.T
+            aug_matrix[i, :] = piv_row.reshape(-1)
             pivot_list.append([i, k])
 
         else:
@@ -108,7 +111,7 @@ def general_soln(A, b, tol=1e-6):
 
     # add remaining cols (in r=m < n case)
     for j in range(k + 1, n):
-        free_col = np.hstack([free_col, -aug_matrix[:, j].reshape(-1, 1)])
+        free_cols = np.hstack([free_cols, -aug_matrix[:, j].reshape(-1, 1)])
         id_col = np.zeros([n, 1])
         id_col[j, 0] = 1
         X_n = np.hstack([X_n, id_col])
@@ -122,7 +125,7 @@ def general_soln(A, b, tol=1e-6):
         # element in d corresponding to pivot element
         x_p[j, 0] = aug_matrix[i, n]
         # fill value in pivot variables
-        X_n[j, :] = free_col[ctr, :]
+        X_n[j, :] = free_cols[ctr, :]
         ctr += 1
 
     soln = Solution(A, b, aug_matrix, pivot_list, rank, x_p, X_n, k)
