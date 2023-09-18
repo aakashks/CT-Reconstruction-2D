@@ -27,7 +27,7 @@ class CreateInterceptMatrix:
         self.phi = 2 * np.pi / no_of_rotations
 
         # square n x n resolution
-        resolution = resolution if resolution else np.sqrt(no_of_rotations * no_of_detectors)
+        resolution = resolution if resolution is not None else np.sqrt(no_of_rotations * no_of_detectors)
         self.a = int(resolution)
 
         # in radians
@@ -124,7 +124,7 @@ class SolveEquation:
         self.A_inverse_ = None
         self.x = None
 
-    def solve(self, useLibrary=False):
+    def solve(self, useLibrary=None):
         """
         main function to solve the equation
         """
@@ -144,12 +144,10 @@ class SolveEquation:
             self.x = svd.Vh.T @ np.diag(svd.S) @ svd.U.T @ self.b.reshape(-1, 1)
 
         else:
-            raise NotImplementedError
-            # soln = general_soln(self.A, self.b)
-            # if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
-            #     self.x = soln.x_particular
-            # else:
-            #     print('one of the solution')
-            #     self.x = soln.x_particular + soln.X_nullspace[:, 0].reshape(-1, 1)
+            soln = general_soln(self.A, self.b)
+            if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
+                self.x = soln.x_particular
+            else:
+                raise ValueError('singular / near-singular matrix')
 
         return self.x
