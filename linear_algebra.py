@@ -5,8 +5,9 @@ class Solution:
     """
     object having all details of the equation
     """
-    def __init__(self, A, b, aug_matrix, pivot_list, rank, x_p, X_n):
+    def __init__(self, A, b, aug_matrix, pivot_list, rank, x_p, X_n, k):
         self.A = A
+        self.m, self.n = A.shape
         self.b = b
         self.aug_matrix = aug_matrix
         self.R = aug_matrix[:, :-1]
@@ -15,9 +16,10 @@ class Solution:
         self.rank = rank
         self.x_particular = x_p
         self.X_nullspace = X_n
+        self.k = k
 
 
-def general_soln(A, b):
+def general_soln(A, b, tol=1e-6):
     """
     reduce A | b to R | d to
     get a general solution of Ax = b where A rk(A) = rk(A|b) < min(m, n) in terms of x particular and x nullspace
@@ -62,13 +64,14 @@ def general_soln(A, b):
     k = -1
     for i in range(m):
         # partial pivoting
-        max_row = i + np.argmax(np.abs(aug_matrix[i:, i]))
-        aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
+        max_row = i + np.argmax(np.abs(aug_matrix[i:, k]))
+        if max_row != i:
+            aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
 
         k += 1
         pivot = aug_matrix[i, k]
 
-        while pivot == 0 and k < n:
+        while abs(pivot) < tol and k < n:
             # corresopnding free variable be 1 rest 0
             id_col = np.zeros([n, 1])
             id_col[k, 0] = 1
@@ -111,17 +114,17 @@ def general_soln(A, b):
         X_n = np.hstack([X_n, id_col])
 
     # check if rk(A|b) > rk(A)
-    if aug_matrix[rank:, n].any():
+    if (np.abs(aug_matrix[rank:, n]) >= tol).any():
         raise ValueError('inconsistent system!!')
 
     ctr = 0
-    for i, k in pivot_list:
+    for i, j in pivot_list:
         # element in d corresponding to pivot element
-        x_p[k, 0] = aug_matrix[i, n]
+        x_p[j, 0] = aug_matrix[i, n]
         # fill value in pivot variables
-        X_n[k, :] = free_col[ctr, :]
+        X_n[j, :] = free_col[ctr, :]
         ctr += 1
 
-    soln = Solution(A, b, aug_matrix, pivot_list, rank, x_p, X_n)
+    soln = Solution(A, b, aug_matrix, pivot_list, rank, x_p, X_n, k)
 
     return soln

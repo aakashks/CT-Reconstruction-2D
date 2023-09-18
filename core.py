@@ -139,11 +139,12 @@ class SolveEquation:
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
         else:
-            soln = general_soln(self.A, self.b)
-            if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
-                self.x = soln.x_particular
-            else:
-                print('one of the solution')
-                self.x = soln.x_particular + soln.X_nullspace[:, 0].reshape(-1, 1)
+            raise NotImplementedError
+            # soln = general_soln(self.A, self.b)
+            # if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
+            #     self.x = soln.x_particular
+            # else:
+            #     print('one of the solution')
+            #     self.x = soln.x_particular + soln.X_nullspace[:, 0].reshape(-1, 1)
 
         return self.x
