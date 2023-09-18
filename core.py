@@ -1,5 +1,5 @@
 import numpy as np
-
+from linear_algebra import *
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
@@ -123,34 +123,6 @@ class SolveEquation:
         self.A_inverse_ = None
         self.x = None
 
-    def gauss_elimination(self, A, b):
-        n = len(b)
-
-        # augmenting A matrix with b
-        aug_matrix = np.hstack((A, b.reshape(-1, 1)))
-
-        # Forward elimination
-        for i in range(n):
-            # partial pivoting
-            max_row = i + np.argmax(np.abs(aug_matrix[i:, i]))
-            aug_matrix[[i, max_row]] = aug_matrix[[max_row, i]]
-
-            pivot = aug_matrix[i, i]
-            assert pivot != 0, 'singular / near-singular matrix'
-
-            aug_matrix[i, :] /= pivot
-
-            for j in range(i + 1, n):
-                factor = aug_matrix[j, i]
-                aug_matrix[j, :] -= factor * aug_matrix[i, :]
-
-        # Backward substitution
-        x = np.zeros(n)
-        for i in range(n - 1, -1, -1):
-            x[i] = aug_matrix[i, -1] - np.dot(aug_matrix[i, i + 1:n], x[i + 1:n])
-
-        return x
-
     def solve(self, useLibrary=False):
         """
         main function to solve the equation
@@ -167,6 +139,11 @@ class SolveEquation:
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
         else:
-            self.x = self.gauss_elimination(self.A, self.b)
+            soln = general_soln(self.A, self.b)
+            if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
+                self.x = soln.x_particular
+            else:
+                print('one of the solution')
+                self.x = soln.x_particular + soln.X_nullspace[:, 0]
 
         return self.x
