@@ -1,9 +1,10 @@
 import numpy as np
 
 
-class Solution:
+class GeneralSolution:
     """
     object having all properties of the solved equation
+    contains bases of the solution space
     """
     def __init__(self, A, b, aug_matrix, pivot_list, rank, x_p, X_n, k):
         self.A = A
@@ -25,6 +26,7 @@ def general_soln(A, b, tol=1e-6, round_off=None):
     get a general solution of Ax = b where A rk(A) = rk(A|b) < min(m, n) in terms of x particular and x nullspace
     A may be rectangular matrix
     in case of full rank square (invertible) matrix x particular is the exact solution
+    in case of Ax = 0 x_particular is 0 and x_nullspace gives the nullspace vectors
 
     for free variables [x2, x4.. ]
     solution space will be x_partcular + x_nullspace @ free_variables [1]
@@ -33,15 +35,16 @@ def general_soln(A, b, tol=1e-6, round_off=None):
     ----------
     tol: float, optional
         value below which consider element as 0
-        is kept 0 when round is specified
+        keep round_off None to use
 
     round_off: int, optional
         rounds off both A and b to this many decimal places.
-        controls the decimal param of np.round()
+        controls the decimal param of np.round().
+        tol is kept 0 when round is specified
 
     Returns
     -------
-    Solution
+    GeneralSolution
 
     Raises
     ------
@@ -145,6 +148,6 @@ def general_soln(A, b, tol=1e-6, round_off=None):
         X_n[j, :] = free_cols[ctr, :]
         ctr += 1
 
-    soln = Solution(A, b, aug_matrix, pivot_list, rank, x_p, X_n, k)
+    soln = GeneralSolution(A, b, aug_matrix, pivot_list, rank, x_p, X_n, k)
 
     return soln

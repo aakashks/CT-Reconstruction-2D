@@ -1,3 +1,5 @@
+import numpy as np
+
 from linear_algebra.gauss_elimination import *
 
 class CreateInterceptMatrix:
@@ -136,6 +138,10 @@ class SolveEquation:
         elif useLibrary == 'inv':
             self.A_inverse_ = np.linalg.inv(self.A)
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
+
+        elif useLibrary == 'svd':
+            svd = np.linalg.svd(self.A, full_matrices=False)
+            self.x = svd.Vh.T @ np.diag(svd.S) @ svd.U.T @ self.b.reshape(-1, 1)
 
         else:
             raise NotImplementedError
