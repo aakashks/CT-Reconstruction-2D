@@ -3,6 +3,7 @@ import numpy as np
 from linear_algebra.gauss_elimination import *
 from linear_algebra.svd import *
 
+
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
                  angle_bw_detectors, resolution=None):
@@ -29,7 +30,7 @@ class CreateInterceptMatrix:
 
         # square n x n resolution
         resolution = resolution if resolution is not None else np.sqrt(no_of_rotations * no_of_detectors)
-        self.a = int(resolution)
+        self.resolution = int(resolution)
 
         # in radians
         self.theta = angle_bw_detectors
@@ -44,8 +45,8 @@ class CreateInterceptMatrix:
         # Make pixel grid
         # each pixel is represented by its bottom left corner coordinate
         # use resolution and object size to make the
-        x = np.linspace(0, self.z, self.a, endpoint=False)
-        k = self.z / self.a
+        x = np.linspace(0, self.z, self.resolution, endpoint=False)
+        k = self.z / self.resolution
         X, Y = np.meshgrid(x, x)
 
         line_from_x = lambda x: np.tan(theta) * (x - d)
@@ -151,5 +152,17 @@ class SolveEquation:
             pinverse = pinv(self.A, num_iterations=200)
             self.x = pinverse @ self.b.reshape(-1, 1)
 
-
         return self.x
+
+class Reconstruction(CreateInterceptMatrix):
+    def __init__(self, num_iterations=200, **params):
+        super().__init__(**params)
+        self.A = self.create_intercept_matrix_from_lines()
+        U, S, Vt = svd(self.A, num_iterations)
+        self.rank = len(S)
+        print('Matrix has shape =', self.A.shape)
+        print('Matrix has Rank =', self.rank)
+        self.pinv = np.linalg.multi_dot([Vt.T, np.diag(1 / S), U.T])
+
+    def solve(self, b):
+        return (self.pinv @ b).reshape(self.resolution, -1)

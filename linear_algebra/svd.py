@@ -11,9 +11,9 @@ def power_iteration(A, num_iterations=1000, tol=1e-8):
     for _ in range(num_iterations):
         Ab = np.dot(A, b)
 
-        # early stopping if we know Ab ~ 0, ie. eigv is close to 0
-        if np.allclose(Ab, 0, atol=tol):
-            return np.zeros_like(b)
+        # # early stopping if we know Ab ~ 0, ie. eigv is close to 0
+        # if np.allclose(Ab, 0, atol=tol):
+        #     return np.zeros_like(b)
 
         norm = np.linalg.norm(Ab)
         b = Ab / norm

@@ -1,8 +1,13 @@
-# Imaging Material using CT scan
+# CT Image reconstruction
 
 ## Problem
 
-Write a Code in Either MATLAB, C/C++ or Python to solve a general inverse problem. That means N number of detectors are given. Size of Object SOJ is given, Distance between Object to Source and Distance between Source to Detector array (center) is given. Number of Rotations (of source and detector array) is given. AX = B The Code will generate A Matrix by deducing the intercept length under a square Pixel using Simple Geometry and above info. The B matrix is given as well. The code must allow user to give any values of these quantity.
+Python code to solve a general inverse problem Ax = b. \
+For N number of detectors, Size of Object SOJ, 
+Distance between Object to Source and Distance between Source to Detector array (center), 
+Number of Rotations (of source and detector array), the Code will generate A Matrix by deducing the intercept length 
+under a square Pixel using Simple Geometry. 
+The detector readings will form b and the solution will form the image.
 
 ## Mathematical statement
 
@@ -17,7 +22,8 @@ Hence, $d$ becomes $$d=\ln(\frac{I_o}{I})$$
 <img src="assets/ct_reconstruction_apparatus.png" height="500"/>
 
 ## Code
-The whole code except of gaussian elimination uses numpy vectorized operations and hence is effecient. The code first generates lines corresponding to the path of radiation through the object and then calculates intercept of those lines on every pixel.
+The code first generates lines corresponding to the path of radiation through the object and then calculates 
+intercept of those lines on every pixel.
 
 ## References
 
