@@ -47,20 +47,15 @@ def svd(A, num_iterations=1000, tol=1e-8):
         # reduce lambda * vT v from the eigendecomposition of AtA
         ATA = ATA - eigenvalue * np.outer(eigenvector, eigenvector)
 
+    if not S:
+        raise ValueError('Matrix has rank 0')
+
     S = np.sqrt(S)
 
     # find the left singular vectors
-    U = []
-    for i in range(len(S)):
-        sigma_i = S[i]
-        vi = V[i]
-        ui = np.dot(A, vi) / sigma_i
-        U.append(ui)
-
-    U = np.column_stack(U)
-    Vt = np.column_stack(V).T
-
-    return U, S, Vt
+    V = np.column_stack(V)
+    U = np.multiply(np.dot(A, V), 1/S)
+    return U, S, V.T
 
 
 def pinv(A, num_iterations=1000, tol=1e-8):
