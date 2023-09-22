@@ -6,6 +6,7 @@ class GeneralSolution:
     object having all properties of the solved equation
     contains bases of the solution space
     """
+
     def __init__(self, A, b, aug_matrix, pivot_list, rank, x_p, X_n, k):
         self.A = A
         self.m, self.n = A.shape
@@ -30,6 +31,8 @@ def general_soln(A, b, tol=1e-6, round_off=None):
 
     for free variables [x2, x4.. ]
     solution space will be x_partcular + x_nullspace @ free_variables [1]
+
+    it is assumed that the system is not overdetermined. even, is not guaranteed to work for r = n when m > n
 
     Parameters
     ----------
@@ -59,7 +62,7 @@ def general_soln(A, b, tol=1e-6, round_off=None):
     """
     b = b.reshape(-1, 1)
     # Augmenting both matrices
-    aug_matrix = np.hstack([A, b]).astype('float64')
+    aug_matrix = np.hstack([A, b]).astype("float64")
 
     if round_off is not None:
         aug_matrix = np.round(aug_matrix, decimals=round_off)
@@ -67,7 +70,7 @@ def general_soln(A, b, tol=1e-6, round_off=None):
 
     m, n = A.shape
     if m != b.shape[0]:
-        raise ValueError('wrong shapes of A and b')
+        raise ValueError("wrong shapes of A and b")
 
     # x_particular must have all 0s in free variables
     x_p = np.zeros([n, 1])
@@ -138,7 +141,7 @@ def general_soln(A, b, tol=1e-6, round_off=None):
 
     # check if rk(A|b) > rk(A)
     if (np.abs(aug_matrix[rank:, n]) > tol).any():
-        raise ValueError('inconsistent system!!')
+        raise ValueError("inconsistent system!!")
 
     ctr = 0
     for i, j in pivot_list:

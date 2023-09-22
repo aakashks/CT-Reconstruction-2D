@@ -124,7 +124,7 @@ class SolveEquation:
         self.A_inverse_ = None
         self.x = None
 
-    def solve(self, useLibrary=None):
+    def solve(self, use=None, useLibrary=None):
         """
         main function to solve the equation
         """
@@ -139,15 +139,14 @@ class SolveEquation:
             self.A_inverse_ = np.linalg.inv(self.A)
             self.x = self.A_inverse_ @ self.b.reshape(-1, 1)
 
-        elif useLibrary == 'svd':
-            svd = np.linalg.svd(self.A, full_matrices=False)
-            self.x = svd.Vh.T @ np.diag(svd.S) @ svd.U.T @ self.b.reshape(-1, 1)
-
-        else:
+        elif use == 'gauss':
             soln = general_soln(self.A, self.b)
             if soln.rank == self.A.shape[0] and self.A.shape[0] == self.A.shape[1]:
                 self.x = soln.x_particular
             else:
                 raise ValueError('singular / near-singular matrix')
+
+        else:
+            raise NotImplementedError()
 
         return self.x
