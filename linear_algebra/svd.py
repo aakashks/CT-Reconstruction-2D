@@ -6,15 +6,14 @@ def power_iteration(A, num_iterations=1000, tol=1e-8):
     """
     power iterations to find out 1 eigenvector of given matrix
     """
-    np.random.seed(42)
     b = np.random.rand(A.shape[1])
 
     for _ in range(num_iterations):
         Ab = np.dot(A, b)
 
         # early stopping if we know Ab ~ 0, ie. eigv is close to 0
-        # if np.allclose(Ab, 0, atol=tol):
-        #     return 0
+        if np.allclose(Ab, 0, atol=tol):
+            return np.zeros_like(b)
 
         norm = np.linalg.norm(Ab)
         b = Ab / norm
@@ -34,16 +33,13 @@ def svd(A, num_iterations=1000, tol=1e-8):
 
     # finding right singular vectors
     for _ in tqdm(range(min(ATA.shape)), desc='Performing decomposition'):
-        eigenvector = power_iteration(ATA, num_iterations, tol).reshape(-1, 1)
-        eigenvalue = eigenvector.T @ A @ eigenvector
+        eigenvector = power_iteration(ATA, num_iterations, tol)
+        eigenvalue = np.dot(np.dot(eigenvector, ATA), eigenvector)
 
-        if eigenvalue == np.nan:
-            raise ValueError('Null encountered!')
-
-        if abs(eigenvalue) < tol:
+        if eigenvalue < tol:
             break
 
-        eigenvector = eigenvector / np.linalg.norm(eigenvector)
+        eigenvector /= np.linalg.norm(eigenvector)
 
         V.append(eigenvector)
         S.append(eigenvalue)
