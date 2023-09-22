@@ -1,6 +1,7 @@
 import numpy as np
 
 from linear_algebra.gauss_elimination import *
+from linear_algebra.svd import *
 
 class CreateInterceptMatrix:
     def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
@@ -147,6 +148,8 @@ class SolveEquation:
                 raise ValueError('singular / near-singular matrix')
 
         else:
-            raise NotImplementedError()
+            pinverse = pinv(self.A, num_iterations=200)
+            self.x = pinverse @ self.b.reshape(-1, 1)
+
 
         return self.x
