@@ -3,7 +3,11 @@ matplotlib
 seaborn
 json
 pandas
+tqdm
 
-# required only for testing shepp logan
+# required if original image available
 pillow
 imageio
+
+# for convolution func
+torch
