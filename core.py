@@ -78,7 +78,8 @@ class CreateInterceptMatrix:
         intercept_matrix = np.apply_along_axis(lambda c: np.sqrt(c[0] ** 2 + c[1] ** 2), 2, intercept_coordinates)
 
         # change to 1d vector
-        return intercept_matrix.flatten()
+        self.A = intercept_matrix.flatten()
+        return self.A
 
     def generate_lines(self):
         """
@@ -155,6 +156,9 @@ class SolveEquation:
         return self.x
 
 class Reconstruction(CreateInterceptMatrix):
+    """
+    Basically made to cache pseudoinverse of A (intercept matrix) which is computationally expensive
+    """
     def __init__(self, num_iterations=200, **params):
         super().__init__(**params)
         self.A = self.create_intercept_matrix_from_lines()
@@ -162,6 +166,7 @@ class Reconstruction(CreateInterceptMatrix):
         self.rank = len(S)
         print('Matrix has shape =', self.A.shape)
         print('Matrix has Rank =', self.rank)
+        # cache pinv
         self.pinv = np.linalg.multi_dot([Vt.T, np.diag(1 / S), U.T])
 
     def solve(self, b):

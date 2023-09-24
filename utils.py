@@ -1,6 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import torch
+
+
+def convolute(img, blur=3):
+    assert img.shape[0] == img.shape[1]
+    s = img.shape[0]
+    img_tensor = torch.from_numpy(img.reshape(1, 1, s, s))
+
+    if blur == 'radial':
+        kernel = torch.tensor([[1, 2, 1], [2, 4, 2], [1, 2, 1]], dtype=torch.double).reshape(1, 1, 3, 3)
+    else:
+        kernel = torch.ones(1, 1, blur, blur, dtype=torch.double)
+
+    kernel /= kernel.sum()
+    img_tensor_blur = torch.nn.functional.conv2d(img_tensor, kernel, padding='same')
+    return np.array(img_tensor_blur.reshape(s, s))
 
 
 # Plotting Utility functions

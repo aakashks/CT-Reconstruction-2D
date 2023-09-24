@@ -31,6 +31,9 @@ def svd(A, num_iterations=1000, tol=1e-8):
     V = []
     S = []
 
+    # for reproducibility of code results
+    np.random.seed(42)
+
     # finding right singular vectors
     for _ in tqdm(range(min(ATA.shape)), desc='Performing decomposition'):
         eigenvector = power_iteration(ATA, num_iterations, tol)
