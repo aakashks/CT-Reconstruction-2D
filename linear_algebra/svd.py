@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def power_iteration(A, num_iterations=1000, tol=1e-8):
+def power_iteration(A, num_iterations):
     """
     power iterations to find out 1 eigenvector of given matrix
     """
@@ -10,11 +10,6 @@ def power_iteration(A, num_iterations=1000, tol=1e-8):
 
     for _ in range(num_iterations):
         Ab = np.dot(A, b)
-
-        # # early stopping if we know Ab ~ 0, ie. eigv is close to 0
-        # if np.allclose(Ab, 0, atol=tol):
-        #     return np.zeros_like(b)
-
         norm = np.linalg.norm(Ab)
         b = Ab / norm
 
@@ -36,7 +31,7 @@ def svd(A, num_iterations=1000, tol=1e-8):
 
     # finding right singular vectors
     for _ in tqdm(range(min(ATA.shape)), desc='Performing decomposition'):
-        eigenvector = power_iteration(ATA, num_iterations, tol)
+        eigenvector = power_iteration(ATA, num_iterations)
         eigenvalue = np.dot(np.dot(eigenvector, ATA), eigenvector)
 
         if eigenvalue < tol:

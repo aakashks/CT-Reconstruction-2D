@@ -159,7 +159,11 @@ class Reconstruction(CreateInterceptMatrix):
     """
     Basically made to cache pseudoinverse of A (intercept matrix) which is computationally expensive
     """
-    def __init__(self, num_iterations=200, **params):
+    def __init__(self, num_iterations=200, round_pinv=5, **params):
+        """
+        round_pinv has effect usually when less than 4
+        increase num_iterations if rank doesn't match
+        """
         super().__init__(**params)
         self.A = self.create_intercept_matrix_from_lines()
         U, S, Vt = svd(self.A, num_iterations)
@@ -168,6 +172,7 @@ class Reconstruction(CreateInterceptMatrix):
         print('Matrix has Rank =', self.rank)
         # cache pinv
         self.pinv = np.linalg.multi_dot([Vt.T, np.diag(1 / S), U.T])
+        self.pinv = np.round(self.pinv, round_pinv)
 
     def solve(self, b):
         return (self.pinv @ b).reshape(self.resolution, -1)
