@@ -116,13 +116,17 @@ class CreateInterceptMatrix:
         x = np.arange(-n + 1, n, 2) / 2 * d / n if n % 2 == 0 else np.arange((-n + 1) // 2, (n + 1) // 2)
         detector_coords = np.dstack(np.meshgrid(x, x)).reshape(-1, 2)
 
-        gamma = self.sdd - self.sod
+        mu = self.sdd - self.sod
         lambd = self.sod
-        alphas = detector_coords[:, 0:1] * lambd * np.cos(phis) + lambd * np.sin(phis) * gamma
-        betas = detector_coords[:, 1:2] * lambd * np.cos(phis)
+        c = np.cos(phis)
+        s = np.sin(phis)
+        a = detector_coords[:, 0:1]
+        b = detector_coords[:, 1:2]
+        alphas = (a*lambd + lambd * mu * s)/(a*s + mu + lambd*c**2)
+        betas = b / (1 - (mu + alphas*s)/(alphas*s - lambd))
 
         phis = phis + np.zeros_like(alphas)
-        line_params_array = np.dstack([alphas, betas, phis]).reshape(-1, 3)
+        line_params_array = np.stack([alphas, betas, phis], 2).reshape(-1, 3)
 
         return line_params_array
 
