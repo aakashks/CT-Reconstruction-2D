@@ -78,8 +78,7 @@ class CreateInterceptMatrix:
         intercept_matrix = np.apply_along_axis(lambda c: np.sqrt(c[0] ** 2 + c[1] ** 2), 2, intercept_coordinates)
 
         # change to 1d vector
-        self.A = intercept_matrix.flatten()
-        return self.A
+        return intercept_matrix.flatten()
 
     def generate_lines(self):
         """
@@ -110,7 +109,8 @@ class CreateInterceptMatrix:
 
     def create_intercept_matrix_from_lines(self):
         line_params_array = self.generate_lines()
-        return np.apply_along_axis(self.calculate_intercepts_from_line, 1, line_params_array)
+        self.A = np.apply_along_axis(self.calculate_intercepts_from_line, 1, line_params_array)
+        return self.A
 
 
 class SolveEquation:
