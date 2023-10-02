@@ -8,6 +8,3 @@ tqdm
 # required if original image available
 pillow
 imageio
-
-# for convolution func
-torch
