@@ -1,9 +1,7 @@
-from linear_algebra.gauss_elimination import *
-from linear_algebra.svd import *
-
+import numpy as np
 
 class CreateInterceptMatrix:
-    def __init__(self, no_of_detectors, source_to_object, source_to_detector, size_of_object, no_of_rotations,
+    def __init__(self, no_of_detectors, source_to_object, source_to_detector, pixel_size, no_of_rotations,
                  detector_side_length, resolution=None):
         """
         Parameters
@@ -14,8 +12,8 @@ class CreateInterceptMatrix:
             source to the centre of object
         source_to_detector
             source to any detector's centre (all detectors should be equidistance from source)
-        size_of_object
-            basically the length of side of square image  (which would fit the object inside it)
+        pixel_size
+            size of 1 pixel unit in the grid of pixels (of both object and detector)
         detector_side_length
             side length of square detector area
 
@@ -23,18 +21,17 @@ class CreateInterceptMatrix:
         self.n = no_of_detectors
         self.sod = source_to_object
         self.sdd = source_to_detector
-        self.o = size_of_object
+        self.p = pixel_size
         self.r = no_of_rotations
 
         # Assumption: no of rotations are for 1 revolution
         self.phi = 2 * np.pi / no_of_rotations
 
-        # square n x n x n resolution
-        resolution = resolution if resolution is not None else np.cbrt(no_of_rotations * no_of_detectors ** 2)
+        # # square n x n x n resolution
+        # resolution = resolution if resolution is not None else np.cbrt(no_of_rotations * no_of_detectors ** 2)
         self.resolution = int(resolution)
 
-        # in radians
-        self.d = detector_side_length
+        # self.d = detector_side_length
 
     def calculate_intercepts_from_line(self, line_params):
         """
@@ -47,7 +44,7 @@ class CreateInterceptMatrix:
         # Make pixel grid
         # each pixel is represented by its bottom left corner coordinate
         # use resolution and object size to make the
-        k = self.o / self.resolution
+        k = self.p
         n = self.resolution
         x = np.arange(-n // 2, n // 2, 1) * k if n % 2 == 0 else np.arange(-n, n + 1, 2) * k / 2
 
@@ -104,16 +101,10 @@ class CreateInterceptMatrix:
         return intercept_matrix.flatten()
 
     def generate_lines(self):
-        """
-        will generate parameters of all the lines passing through the object
-        lines are generated such 0th axis ie. rows have readings from same detector but different rotation angles
-
-        [[d1-r1, d1-r2, d1-r3], [d2-r1, d2-r2, d3-r3]]
-        """
         phis = (np.arange(self.r) * self.phi).reshape(1, -1)
         n = self.n
-        d = self.d
-        x = np.arange(-n + 1, n, 2) / 2 * d / n if n % 2 == 0 else np.arange((-n + 1) // 2, (n + 1) // 2)
+        p = self.p
+        x = np.arange(-n + 1, n, 2) / 2 * p if n % 2 == 0 else np.arange((-n + 1) // 2, (n + 1) // 2) * p
         detector_coords = np.dstack(np.meshgrid(x, x)).reshape(-1, 2)
 
         mu = self.sdd - self.sod
