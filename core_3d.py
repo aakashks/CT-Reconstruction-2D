@@ -1,37 +1,30 @@
 import numpy as np
 
 class CreateInterceptMatrix:
-    def __init__(self, no_of_detectors, source_to_object, source_to_detector, pixel_size, no_of_rotations,
-                 detector_side_length, resolution=None):
+    def __init__(self, n_detectors, source_to_object, source_to_detector, pixel_size, projections,
+                 resolution=None):
         """
         Parameters
         ----------
-        no_of_detectors
+        n_detectors
             no of detectors fit in 1 side length of square area
         source_to_object
             source to the centre of object
         source_to_detector
             source to any detector's centre (all detectors should be equidistance from source)
         pixel_size
-            size of 1 pixel unit in the grid of pixels (of both object and detector)
-        detector_side_length
-            side length of square detector area
+            size of 1 pixel unit in the grid of pixels (of both object and detector, which is ASSUMPTION)
 
         """
-        self.n = no_of_detectors
+        self.n = n_detectors
         self.sod = source_to_object
         self.sdd = source_to_detector
-        self.p = pixel_size
-        self.r = no_of_rotations
+        self.ps = pixel_size
+        self.p = projections
 
-        # Assumption: no of rotations are for 1 revolution
-        self.phi = 2 * np.pi / no_of_rotations
-
-        # # square n x n x n resolution
-        # resolution = resolution if resolution is not None else np.cbrt(no_of_rotations * no_of_detectors ** 2)
-        self.resolution = int(resolution)
-
-        # self.d = detector_side_length
+        # Assumption: maximum angle is 2pi
+        self.phi = 2 * np.pi / projections
+        self.resolution = resolution if resolution else n_detectors
 
     def calculate_intercepts_from_line(self, line_params):
         """
@@ -44,9 +37,9 @@ class CreateInterceptMatrix:
         # Make pixel grid
         # each pixel is represented by its bottom left corner coordinate
         # use resolution and object size to make the
-        k = self.p
+        ps = self.ps
         n = self.resolution
-        x = np.arange(-n // 2, n // 2, 1) * k if n % 2 == 0 else np.arange(-n, n + 1, 2) * k / 2
+        x = np.arange(-n // 2, n // 2, 1) * ps if n % 2 == 0 else np.arange(-n, n + 1, 2) * ps / 2
 
         X, Y, Z = np.meshgrid(x, x, x)
 
@@ -64,31 +57,31 @@ class CreateInterceptMatrix:
 
         # Get line intercepts with 6 boundaries of each voxel
         X1, Y1 = xy_from_z(Z)
-        X2, Y2 = xy_from_z(Z + k)
+        X2, Y2 = xy_from_z(Z + ps)
 
         Y3, Z3 = yz_from_x(X)
-        Y4, Z4 = yz_from_x(X + k)
+        Y4, Z4 = yz_from_x(X + ps)
 
         Z5, X5 = zx_from_y(Y)
-        Z6, X6 = zx_from_y(Y + k)
+        Z6, X6 = zx_from_y(Y + ps)
 
-        condition1 = (X <= X1) * (X1 < X + k) * (Y <= Y1) * (Y1 < Y + k)
+        condition1 = (X <= X1) * (X1 < X + ps) * (Y <= Y1) * (Y1 < Y + ps)
         I1 = np.stack([np.where(condition1, X1, 0), np.where(condition1, Y1, 0), np.where(condition1, Z, 0)], 3)
 
-        condition2 = (X <= X2) * (X2 < X + k) * (Y <= Y2) * (Y2 < Y + k)
-        I2 = np.stack([np.where(condition2, X2, 0), np.where(condition2, Y2, 0), np.where(condition2, Z + k, 0)], 3)
+        condition2 = (X <= X2) * (X2 < X + ps) * (Y <= Y2) * (Y2 < Y + ps)
+        I2 = np.stack([np.where(condition2, X2, 0), np.where(condition2, Y2, 0), np.where(condition2, Z + ps, 0)], 3)
 
-        condition3 = (Y <= Y3) * (Y3 < Y + k) * (Z <= Z3) * (Z3 < Z + k)
+        condition3 = (Y <= Y3) * (Y3 < Y + ps) * (Z <= Z3) * (Z3 < Z + ps)
         I3 = np.stack([np.where(condition3, X, 0), np.where(condition3, Y3, 0), np.where(condition3, Z3, 0)], 3)
 
-        condition4 = (Y <= Y4) * (Y4 < Y + k) + (Z <= Z4) * (Z4 < Z + k)
-        I4 = np.stack([np.where(condition4, X + k, 0), np.where(condition4, Y4, 0), np.where(condition4, Z4, 0)], 3)
+        condition4 = (Y <= Y4) * (Y4 < Y + ps) + (Z <= Z4) * (Z4 < Z + ps)
+        I4 = np.stack([np.where(condition4, X + ps, 0), np.where(condition4, Y4, 0), np.where(condition4, Z4, 0)], 3)
 
-        condition5 = (X <= X5) * (X5 < X + k) * (Z <= Z5) * (Z5 < Z + k)
+        condition5 = (X <= X5) * (X5 < X + ps) * (Z <= Z5) * (Z5 < Z + ps)
         I5 = np.stack([np.where(condition5, X5, 0), np.where(condition5, Y, 0), np.where(condition5, Z5, 0)], 3)
 
-        condition6 = (X <= X6) * (X6 < X + k) * (Z <= Z6) * (Z6 < Z + k)
-        I6 = np.stack([np.where(condition6, X6, 0), np.where(condition6, Y + k, 0), np.where(condition6, Z6, 0)], 3)
+        condition6 = (X <= X6) * (X6 < X + ps) * (Z <= Z6) * (Z6 < Z + ps)
+        I6 = np.stack([np.where(condition6, X6, 0), np.where(condition6, Y + ps, 0), np.where(condition6, Z6, 0)], 3)
 
         # To get length of line from all these intercept coordinates
         intercept_coordinates = np.abs(np.abs(np.abs(I1 - I2) - np.abs(I3 - I4)) - np.abs(I5 - I6))
@@ -101,9 +94,9 @@ class CreateInterceptMatrix:
         return intercept_matrix.flatten()
 
     def generate_lines(self):
-        phis = (np.arange(self.r) * self.phi).reshape(1, -1)
+        phis = (np.arange(self.p) * self.phi).reshape(1, -1)
         n = self.n
-        p = self.p
+        p = self.ps
         x = np.arange(-n + 1, n, 2) / 2 * p if n % 2 == 0 else np.arange((-n + 1) // 2, (n + 1) // 2) * p
         detector_coords = np.dstack(np.meshgrid(x, x)).reshape(-1, 2)
 
