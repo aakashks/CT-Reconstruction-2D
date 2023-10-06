@@ -2,7 +2,7 @@ import numpy as np
 
 class CreateInterceptMatrix:
     def __init__(self, n_detectors, source_to_object, source_to_detector, pixel_size, projections,
-                 resolution=None):
+                 resolution=None, x=None, y=None, z=None):
         """
         Parameters
         ----------
@@ -13,8 +13,10 @@ class CreateInterceptMatrix:
         source_to_detector
             source to any detector's centre (all detectors should be equidistance from source)
         pixel_size
-            size of 1 pixel unit in the grid of pixels (of both object and detector, which is ASSUMPTION)
-
+            size of 1 pixel unit in the grid of pixels (of both object and detector, which is an ASSUMPTION)
+        resolution
+            ASSUMING same resolution along all axis
+        x y and z are Lists containing x_min and x_max taking bottom left of detector as origin
         """
         self.n = n_detectors
         self.sod = source_to_object
@@ -25,6 +27,14 @@ class CreateInterceptMatrix:
         # Assumption: maximum angle is 2pi
         self.phi = 2 * np.pi / projections
         self.resolution = resolution if resolution else n_detectors
+
+        # recon volume dimensions
+        self.xyz = None
+
+        if x is not None and y is not None and z is not None:
+            vol_recon_dims = np.array([list(i) for i in [x, y, z]])
+            # shifting origin from bottom left to centre of volume
+            self.xyz = vol_recon_dims - np.array([self.n/2, self.n/2, self.sdd - self.sod]).reshape(-1, 1)
 
     def calculate_intercepts_from_line(self, line_params):
         """
@@ -39,9 +49,12 @@ class CreateInterceptMatrix:
         # use resolution and object size to make the
         ps = self.ps
         n = self.resolution
-        x = np.arange(-n // 2, n // 2, 1) * ps if n % 2 == 0 else np.arange(-n, n + 1, 2) * ps / 2
 
+        x = np.arange(-n // 2, n // 2, 1) * ps if n % 2 == 0 else np.arange(-n, n + 1, 2) * ps / 2
         X, Y, Z = np.meshgrid(x, x, x)
+
+        if self.xyz is not None:
+            X, Y, Z = np.meshgrid(*[np.arange(*self.xyz[i]) * ps for i in range(3)])
 
         sod = self.sod
 
