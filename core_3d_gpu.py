@@ -32,9 +32,9 @@ class CreateInterceptMatrix:
         self.xyz = None
 
         if x is not None and y is not None and z is not None:
-            vol_recon_dims = torch.Tensor([list(i) for i in [x, y, z]])
+            vol_recon_dims = torch.tensor([list(i) for i in [x, y, z]])
             # shifting origin from bottom left to centre of volume
-            self.xyz = vol_recon_dims - torch.Tensor([self.n/2, self.n/2, self.sdd - self.sod]).reshape(-1, 1)
+            self.xyz = vol_recon_dims - torch.tensor([self.n/2, self.n/2, self.sdd - self.sod]).reshape(-1, 1)
 
     def calculate_intercepts_from_line(self, line_params):
         """
@@ -121,11 +121,11 @@ class CreateInterceptMatrix:
         betas = b / (1 - (mu + alphas*s)/(alphas*s - lambd))
 
         phis = phis + torch.zeros_like(alphas)
-        line_params_Tensor = torch.stack([alphas, betas, phis], 2).reshape(-1, 3)
+        line_params_tensor = torch.stack([alphas, betas, phis], 2).reshape(-1, 3)
 
-        return line_params_Tensor
+        return line_params_tensor
 
     def create_intercept_matrix_from_lines(self):
-        line_params_Tensor = self.generate_lines()
-        self.A = self.calculate_intercepts_from_line(line_params_Tensor)
+        line_params_tensor = self.generate_lines()
+        self.A = self.calculate_intercepts_from_line(line_params_tensor)
         return self.A
