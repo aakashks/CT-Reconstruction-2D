@@ -1,0 +1,9 @@
+{
+  "no_of_detectors": 32,
+  "source_to_object": 10,
+  "source_to_detector": 15,
+  "size_of_object": 10,
+  "no_of_rotations": 32,
+  "resolution": 32,
+  "detector length": 5
+}
