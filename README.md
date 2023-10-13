@@ -1,4 +1,4 @@
-# CT Image reconstruction
+# CT Image reconstruction (2D)
 
 ## Problem
 
