@@ -75,7 +75,7 @@ class CreateInterceptMatrix:
         intercept_coordinates = np.abs(np.abs(Il - Ir) - np.abs(Id - Iu))
 
         # now squaring will give the length
-        intercept_matrix = np.apply_along_axis(lambda c: np.sqrt(c[0] ** 2 + c[1] ** 2), 2, intercept_coordinates)
+        intercept_matrix = np.linalg.norm(intercept_coordinates, axis=2)
 
         # change to 1d vector
         return intercept_matrix.flatten()

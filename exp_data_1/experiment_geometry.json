@@ -1,9 +1,0 @@
-{
-  "no_of_detectors": 5,
-  "source_to_object": 12.5,
-  "source_to_detector": 35,
-  "size_of_object": 12,
-  "no_of_rotations": 18,
-  "angle_bw_detectors": 0.16188,
-  "resolution": 15
-}

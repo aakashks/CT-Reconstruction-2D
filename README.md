@@ -27,4 +27,5 @@ intercept of those lines on every pixel.
 
 ## References
 
-[Original experiment paper](https://www.sciencedirect.com/science/article/pii/S0939388923000880)
+1. [Original experiment paper](https://www.sciencedirect.com/science/article/pii/S0939388923000880)
+2. [Siddon's Algorithm](https://stackoverflow.com/questions/3609382/calculating-the-length-of-intersections-through-a-2d-grid)
