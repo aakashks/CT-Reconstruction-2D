@@ -4,7 +4,6 @@ seaborn
 json
 pandas
 tqdm
-
-# required if original image available
 pillow
 imageio
+scikit-learn
